@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build project
+      run: make all
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: built-binary
+        path: bin/
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: built-binary
+        path: bin/
+
+    - name: Make test executable
+      run: chmod +x bin/test
+
+    - name: Run tests
+      run: |
+        ls bin/main # Verify that the binary file exists
+        ls bin/test # Verify that the test files exist
+        bin/test # Run the tests
